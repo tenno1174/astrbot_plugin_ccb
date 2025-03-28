@@ -1,3 +1,4 @@
+# -- coding: utf-8 --
 from astrbot.api.event import filter, AstrMessageEvent, MessageEventResult
 from astrbot.api.star import Context, Star, register
 from astrbot.api import logger
@@ -22,6 +23,13 @@ def get_avatar(user_id: str) -> bytes:
     avatar_url = f"https://q4.qlogo.cn/headimg_dl?dst_uin={user_id}&spec=640"  
     return avatar_url
   
+def makeit(data, target_user_id):
+  for item in data:
+          if a1 in item and item[a1] == target_user_id:
+           a = 1 
+           return a  
+  a = 2       
+  return a  
 
 @register("ccb", "灵煞", "和群友赛博sex的插件", "1.0.0")
 class ccb(Star):
@@ -40,9 +48,11 @@ class ccb(Star):
       pic = get_avatar(target_user_id)
       with open(DATA_FILE,'r') as f:
           data=json.load(f)
-      for item in data:
-          if a1 in item and item[a1] == target_user_id:
-            try:
+      a = makeit(data, target_user_id)
+      if a == 1:
+        try:
+          for item in data:
+            if a1 in item and item[a1] == target_user_id:
               if event.get_platform_name() == "aiocqhttp":
                 from astrbot.core.platform.sources.aiocqhttp.aiocqhttp_message_event import AiocqhttpMessageEvent
                 assert isinstance(event, AiocqhttpMessageEvent)
@@ -59,31 +69,30 @@ class ccb(Star):
                         ]
                 yield event.chain_result(chain)
                 with open(DATA_FILE,'w') as f:
-                   json.dump(dir,f)
+                   json.dump(data,f)
                 break   
-            except Exception as e:
+        except Exception as e:
              logger.error(f"报错: {e}") 
-             yield event.plain_result("对方拒绝了和你ccb")           
-             break      
-          else:   
-            try:
-              if event.get_platform_name() == "aiocqhttp":
-                from astrbot.core.platform.sources.aiocqhttp.aiocqhttp_message_event import AiocqhttpMessageEvent
-                assert isinstance(event, AiocqhttpMessageEvent)
-                client = event.bot
-                stranger_payloads = {"user_id": target_user_id}
-                stranger_info: dict = await client.api.call_action('get_stranger_info', **stranger_payloads)
-                nickname = stranger_info['nick']
-                chain = [
-                        Comp.Plain(f"你和{nickname}发生了{time}min长的ccb行为，向ta注入了{V}ml的生命因子"),
-                        Comp.Image.fromURL(pic),  # 从 URL 发送图片
-                        Comp.Plain("这是ta的初体验。")
-                    ]
-                yield event.chain_result(chain)
-            except Exception as e:
-              logger.error(f"报错: {e}")
-              yield event.plain_result("对方拒绝了和你ccb")      
-          dir = {'id':target_user_id, 'num':1, 'vol':V}
-          data.append(dir)
-          with open(DATA_FILE,'w') as f:
-              json.dump(data,f)  
+             yield event.plain_result("对方拒绝了和你ccb")
+      if a == 2:
+        try:
+          if event.get_platform_name() == "aiocqhttp":
+              from astrbot.core.platform.sources.aiocqhttp.aiocqhttp_message_event import AiocqhttpMessageEvent
+              assert isinstance(event, AiocqhttpMessageEvent)
+              client = event.bot
+              stranger_payloads = {"user_id": target_user_id}
+              stranger_info: dict = await client.api.call_action('get_stranger_info', **stranger_payloads)
+              nickname = stranger_info['nick']
+              chain = [
+                      Comp.Plain(f"你和{nickname}发生了{time}min长的ccb行为，向ta注入了{V}ml的生命因子"),
+                      Comp.Image.fromURL(pic),  # 从 URL 发送图片
+                      Comp.Plain("这是ta的初体验。")
+                  ]
+              yield event.chain_result(chain)
+              dir = {"id":target_user_id, "num":1, "vol":V}
+              data.append(dir)
+              with open(DATA_FILE,'w') as f:
+                json.dump(data,f)
+        except Exception as e:
+           logger.error(f"报错: {e}")
+           yield event.plain_result("对方拒绝了和你ccb")
